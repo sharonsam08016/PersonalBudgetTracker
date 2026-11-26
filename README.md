@@ -4,7 +4,7 @@ A full-stack MERN application that helps users manage their personal finances by
 
 ## Project Overview
 
-The Personal Budget & Expense Tracker provides a simple and organized way to monitor income-related spending habits and manage monthly expenses.
+The Personal Budget & Expense Tracker provides a simple and organized way to monitor spending habits and manage monthly expenses.
 
 Users can create an account, securely log in, record expenses, categorize transactions, set monthly budgets, and analyze their spending through visual charts.
 
@@ -39,7 +39,6 @@ Users can create an account, securely log in, record expenses, categorize transa
 - Monthly budget overview
 - Remaining balance
 - Category-wise expense distribution
-- Spending by category
 - Monthly spending trend
 - Recent five expenses
 - Budget exceeded warning
@@ -66,7 +65,6 @@ PersonalBudgetTracker/
 │   ├── middleware/
 │   ├── models/
 │   ├── routes/
-│   ├── .env
 │   ├── server.js
 │   └── package.json
 │
@@ -81,9 +79,17 @@ PersonalBudgetTracker/
 │   │   ├── App.jsx
 │   │   ├── api.js
 │   │   └── index.css
-│   ├── .env
 │   └── package.json
 │
+├── screenshots/
+│   ├── Budget.png
+│   ├── Dashboard - 1.png
+│   ├── Dashboard - 2.png
+│   ├── Expenses.png
+│   ├── Log-in.png
+│   └── Register Log-in.png
+│
+├── Personal Budget Tracker API.postman_collection.json
 └── README.md
 ```
 
@@ -98,7 +104,7 @@ PersonalBudgetTracker/
 ### 1. Clone the Repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/sharonsam08016/PersonalBudgetTracker.git
 cd PersonalBudgetTracker
 ```
 
@@ -129,7 +135,7 @@ Backend runs at:
 
 ### 3. Frontend Setup
 
-Open another terminal:
+Open another terminal from the project root:
 
 ```bash
 cd frontend
@@ -204,24 +210,4 @@ Authorization: Bearer YOUR_JWT_TOKEN
 
 - Passwords are hashed before being stored.
 - JWT authentication protects private endpoints.
-- User-specific expense and budget records are retrieved using the authenticated user ID.
-- Environment variables are used for sensitive configuration.
-
-## Future Enhancements
-
-- Export expenses to CSV and PDF
-- Recurring expense management
-- Advanced financial reports
-- Income tracking
-- Email notifications for budget alerts
-- Improved data visualization and analytics
-
-## Author
-
-**Sharon Sam**
-
-BCA Student | Data Science
-
-## License
-
-This project was developed as a MERN Stack developer machine-test project.
+- User-specific
