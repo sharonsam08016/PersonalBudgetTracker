@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 
@@ -5,7 +6,7 @@ const Budget = require("../models/Budget");
 const Expense = require("../models/Expense");
 const authMiddleware = require("../middleware/authMiddleware");
 
-// Set or update monthly budget
+// Set or create monthly budget
 router.post("/", authMiddleware, async (req, res) => {
     try {
         const { month, year, amount } = req.body;
@@ -16,7 +17,12 @@ router.post("/", authMiddleware, async (req, res) => {
             });
         }
 
-        if (month < 1 || month > 12 || amount < 0) {
+        if (
+            month < 1 ||
+            month > 12 ||
+            amount < 0 ||
+            !Number.isFinite(Number(amount))
+        ) {
             return res.status(400).json({
                 message: "Invalid month or budget amount"
             });
@@ -48,6 +54,61 @@ router.post("/", authMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({
             message: "Error saving budget",
+            error: error.message
+        });
+    }
+});
+
+// Update a specific budget by ID
+router.put("/:id", authMiddleware, async (req, res) => {
+    try {
+        const { amount, month, year } = req.body;
+
+        const budget = await Budget.findOne({
+            _id: req.params.id,
+            user: req.user.userId
+        });
+
+        if (!budget) {
+            return res.status(404).json({
+                message: "Budget not found"
+            });
+        }
+
+        if (amount !== undefined) {
+            if (amount < 0 || !Number.isFinite(Number(amount))) {
+                return res.status(400).json({
+                    message: "Invalid budget amount"
+                });
+            }
+
+            budget.amount = amount;
+        }
+
+        if (month !== undefined) {
+            if (month < 1 || month > 12) {
+                return res.status(400).json({
+                    message: "Invalid month"
+                });
+            }
+
+            budget.month = month;
+        }
+
+        if (year !== undefined) {
+            budget.year = year;
+        }
+
+        await budget.save();
+
+        res.status(200).json({
+            message: "Budget updated successfully",
+            budget
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Error updating budget",
             error: error.message
         });
     }

@@ -7,8 +7,9 @@ const Expense = require("../models/Expense");
 const Budget = require("../models/Budget");
 const authMiddleware = require("../middleware/authMiddleware");
 
-// GET Dashboard Analytics
-router.get("/", authMiddleware, async (req, res) => {
+// GET Dashboard Summary
+// GET /api/dashboard/summary
+router.get("/summary", authMiddleware, async (req, res) => {
     try {
         const userId = new mongoose.Types.ObjectId(req.user.userId);
 
@@ -28,7 +29,10 @@ router.get("/", authMiddleware, async (req, res) => {
         // Fetch monthly expenses
         const expenses = await Expense.find({
             user: userId,
-            date: { $gte: startDate, $lt: endDate }
+            date: {
+                $gte: startDate,
+                $lt: endDate
+            }
         }).sort({ date: -1 });
 
         const totalSpent = expenses.reduce(
@@ -51,13 +55,18 @@ router.get("/", authMiddleware, async (req, res) => {
             {
                 $match: {
                     user: userId,
-                    date: { $gte: startDate, $lt: endDate }
+                    date: {
+                        $gte: startDate,
+                        $lt: endDate
+                    }
                 }
             },
             {
                 $group: {
                     _id: "$category",
-                    total: { $sum: "$amount" }
+                    total: {
+                        $sum: "$amount"
+                    }
                 }
             },
             {
@@ -68,15 +77,20 @@ router.get("/", authMiddleware, async (req, res) => {
                 }
             },
             {
-                $sort: { total: -1 }
+                $sort: {
+                    total: -1
+                }
             }
         ]);
 
-        // Latest five expenses
+        // Latest five transactions
         const recentExpenses = await Expense.find({
             user: userId
         })
-            .sort({ date: -1, createdAt: -1 })
+            .sort({
+                date: -1,
+                createdAt: -1
+            })
             .limit(5);
 
         res.status(200).json({

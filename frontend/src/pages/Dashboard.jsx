@@ -52,7 +52,7 @@ function Dashboard() {
             try {
                 const [dashboardResponse, expensesResponse] =
                     await Promise.all([
-                        api.get("/dashboard"),
+                        api.get("/dashboard/summary"),
                         api.get("/expenses")
                     ]);
 
@@ -70,13 +70,15 @@ function Dashboard() {
                     const total = expenseList
                         .filter((expense) => {
                             const date = new Date(expense.date);
+
                             return (
                                 date.getFullYear() === currentYear &&
                                 date.getMonth() === index
                             );
                         })
                         .reduce(
-                            (sum, expense) => sum + Number(expense.amount),
+                            (sum, expense) =>
+                                sum + Number(expense.amount),
                             0
                         );
 
@@ -87,6 +89,7 @@ function Dashboard() {
                 });
 
                 setMonthlyTrend(trend);
+
             } catch (err) {
                 setError(
                     err.response?.data?.message ||
@@ -98,6 +101,7 @@ function Dashboard() {
         };
 
         fetchDashboard();
+
     }, [navigate]);
 
     if (loading) {
@@ -118,13 +122,18 @@ function Dashboard() {
 
     if (!dashboard) return null;
 
-    const { summary, categoryBreakdown, recentExpenses } = dashboard;
+    const {
+        summary,
+        categoryBreakdown = [],
+        recentExpenses = []
+    } = dashboard;
 
     const currency = (value) =>
-        `₹${Number(value).toLocaleString("en-IN")}`;
+        `₹${Number(value || 0).toLocaleString("en-IN")}`;
 
     return (
         <div className="dashboard-container">
+
             <header className="dashboard-header">
                 <div>
                     <h1>Personal Budget Tracker</h1>
@@ -134,9 +143,12 @@ function Dashboard() {
 
             <h2>Dashboard Overview</h2>
 
+            {/* SUMMARY CARDS */}
+
             <div className="summary-grid">
+
                 <div className="summary-card">
-                    <h3>Total Expenses</h3>
+                    <h3>Total Transactions</h3>
                     <h2>{summary.totalExpenses}</h2>
                 </div>
 
@@ -154,16 +166,31 @@ function Dashboard() {
                     <h3>Remaining Balance</h3>
                     <h2>{currency(summary.remaining)}</h2>
                 </div>
+
             </div>
 
+            {/* BUDGET WARNING */}
+
             {summary.exceeded && (
-                <div className="error-message" style={{ marginTop: "20px" }}>
+                <div
+                    className="error-message"
+                    style={{ marginTop: "20px" }}
+                >
                     Warning! You have exceeded your monthly budget.
                 </div>
             )}
 
-            <div className="summary-grid" style={{ marginTop: "25px" }}>
-                <section className="dashboard-section" style={{ marginTop: 0 }}>
+            {/* CATEGORY CHARTS */}
+
+            <div
+                className="summary-grid"
+                style={{ marginTop: "25px" }}
+            >
+
+                <section
+                    className="dashboard-section"
+                    style={{ marginTop: 0 }}
+                >
                     <h2>Category-wise Expense Distribution</h2>
 
                     {categoryBreakdown.length === 0 ? (
@@ -180,13 +207,20 @@ function Dashboard() {
                                     outerRadius={100}
                                     label
                                 >
-                                    {categoryBreakdown.map((item, index) => (
-                                        <Cell
-                                            key={item.category}
-                                            fill={COLORS[index % COLORS.length]}
-                                        />
-                                    ))}
+                                    {categoryBreakdown.map(
+                                        (item, index) => (
+                                            <Cell
+                                                key={item.category}
+                                                fill={
+                                                    COLORS[
+                                                        index % COLORS.length
+                                                    ]
+                                                }
+                                            />
+                                        )
+                                    )}
                                 </Pie>
+
                                 <Tooltip formatter={currency} />
                                 <Legend />
                             </PieChart>
@@ -194,7 +228,10 @@ function Dashboard() {
                     )}
                 </section>
 
-                <section className="dashboard-section" style={{ marginTop: 0 }}>
+                <section
+                    className="dashboard-section"
+                    style={{ marginTop: 0 }}
+                >
                     <h2>Spending by Category</h2>
 
                     {categoryBreakdown.length === 0 ? (
@@ -206,6 +243,7 @@ function Dashboard() {
                                 <XAxis dataKey="category" />
                                 <YAxis />
                                 <Tooltip formatter={currency} />
+
                                 <Bar
                                     dataKey="total"
                                     name="Amount Spent"
@@ -216,10 +254,15 @@ function Dashboard() {
                         </ResponsiveContainer>
                     )}
                 </section>
+
             </div>
 
+            {/* MONTHLY SPENDING TREND */}
+
             <section className="dashboard-section">
-                <h2>Monthly Spending Trend ({new Date().getFullYear()})</h2>
+                <h2>
+                    Monthly Spending Trend ({new Date().getFullYear()})
+                </h2>
 
                 <ResponsiveContainer width="100%" height={320}>
                     <LineChart data={monthlyTrend}>
@@ -228,6 +271,7 @@ function Dashboard() {
                         <YAxis />
                         <Tooltip formatter={currency} />
                         <Legend />
+
                         <Line
                             type="monotone"
                             dataKey="spending"
@@ -239,6 +283,8 @@ function Dashboard() {
                     </LineChart>
                 </ResponsiveContainer>
             </section>
+
+            {/* RECENT EXPENSES */}
 
             <section className="dashboard-section">
                 <h2>Recent Expenses</h2>
@@ -262,9 +308,13 @@ function Dashboard() {
                                     <tr key={expense._id}>
                                         <td>{expense.title}</td>
                                         <td>{expense.category}</td>
-                                        <td>{currency(expense.amount)}</td>
                                         <td>
-                                            {new Date(expense.date).toLocaleDateString("en-IN")}
+                                            {currency(expense.amount)}
+                                        </td>
+                                        <td>
+                                            {new Date(
+                                                expense.date
+                                            ).toLocaleDateString("en-IN")}
                                         </td>
                                     </tr>
                                 ))}
@@ -273,6 +323,7 @@ function Dashboard() {
                     </div>
                 )}
             </section>
+
         </div>
     );
 }

@@ -2,7 +2,7 @@
 const dns = require("dns");
 
 // Configure DNS
-dns.setServers(["1.1.1.1", "8.8.8.8"]);
+dns.setServers(["1.1.1.1"]);
 
 const express = require("express");
 const cors = require("cors");
@@ -25,6 +25,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/budgets", budgetRoutes);
+app.use("/api/budget", budgetRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 // Test Route

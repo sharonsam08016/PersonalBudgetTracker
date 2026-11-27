@@ -1,132 +1,245 @@
+
 {
   "info": {
-    "_postman_id": "fa3bf5ee-6b9b-4fbd-97fa-49192a6eda3a",
     "name": "Personal Budget Tracker API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "60447703",
-    "_collection_link": "https://go.postman.co/collection/60447703-fa3bf5ee-6b9b-4fbd-97fa-49192a6eda3a?source=collection_link"
+    "description": "Complete API collection for the Personal Budget and Expense Tracker MERN application.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "expenseId",
+      "value": ""
+    },
+    {
+      "key": "budgetId",
+      "value": ""
+    }
+  ],
   "item": [
     {
-      "name": "Register User.",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/profile"
+          }
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Login User",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
+      "name": "Expense Management",
+      "item": [
+        {
+          "name": "Add Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Lunch\",\n  \"amount\": 250,\n  \"category\": \"Food\",\n  \"date\": \"2026-11-27\",\n  \"paymentMethod\": \"UPI\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/expenses"
+          }
+        },
+        {
+          "name": "Get All Expenses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/expenses"
+          }
+        },
+        {
+          "name": "Get Expense By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/expenses/{{expenseId}}"
+          }
+        },
+        {
+          "name": "Update Expense",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Lunch\",\n  \"amount\": 300,\n  \"category\": \"Food\",\n  \"date\": \"2026-11-27\",\n  \"paymentMethod\": \"UPI\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/expenses/{{expenseId}}"
+          }
+        },
+        {
+          "name": "Delete Expense",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/expenses/{{expenseId}}"
+          }
+        },
+        {
+          "name": "Search and Filter Expenses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/expenses?search=Lunch&category=Food&paymentMethod=UPI&startDate=2026-11-01&endDate=2026-11-30&sortBy=date&order=desc"
+          }
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Get User Profile",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
+      "name": "Budget Management",
+      "item": [
+        {
+          "name": "Set Monthly Budget",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"month\": 11,\n  \"year\": 2026,\n  \"amount\": 25000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/budget"
+          }
+        },
+        {
+          "name": "Get Monthly Budget",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/budget?month=11&year=2026"
+          }
+        },
+        {
+          "name": "Update Monthly Budget",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 30000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/budget/{{budgetId}}"
+          }
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Add Expense",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/summary"
+          }
         }
-      },
-      "response": []
-    },
-    {
-      "name": "Get All Expenses",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Expense By ID.",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Update Expense",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Delete Expense",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Set Monthly Budget",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Monthly Budget",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Dashboard Analytics",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": ""
-        }
-      },
-      "response": []
+      ]
     }
   ]
 }

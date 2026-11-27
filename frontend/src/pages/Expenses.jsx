@@ -7,8 +7,13 @@ function Expenses() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
+
+    // Search and filter states
     const [search, setSearch] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
+    const [paymentMethodFilter, setPaymentMethodFilter] = useState("All");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
     const [sortOption, setSortOption] = useState("newest");
 
     const initialForm = {
@@ -124,6 +129,22 @@ function Expenses() {
             categoryFilter === "All" ||
             expense.category === categoryFilter
         )
+        .filter((expense) =>
+            paymentMethodFilter === "All" ||
+            expense.paymentMethod === paymentMethodFilter
+        )
+        .filter((expense) => {
+            if (!startDate && !endDate) return true;
+
+            const expenseDate = new Date(expense.date)
+                .toISOString()
+                .split("T")[0];
+
+            if (startDate && expenseDate < startDate) return false;
+            if (endDate && expenseDate > endDate) return false;
+
+            return true;
+        })
         .sort((a, b) => {
             switch (sortOption) {
                 case "oldest":
@@ -248,6 +269,31 @@ function Expenses() {
                     </select>
 
                     <select
+                        value={paymentMethodFilter}
+                        onChange={(e) => setPaymentMethodFilter(e.target.value)}
+                    >
+                        <option value="All">All Payment Methods</option>
+                        {["Cash", "UPI", "Credit Card", "Debit Card"].map((item) => (
+                            <option key={item} value={item}>{item}</option>
+                        ))}
+                    </select>
+
+                    <label>From Date</label>
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                    />
+
+                    <label>To Date</label>
+                    <input
+                        type="date"
+                        value={endDate}
+                        min={startDate || undefined}
+                        onChange={(e) => setEndDate(e.target.value)}
+                    />
+
+                    <select
                         value={sortOption}
                         onChange={(e) => setSortOption(e.target.value)}
                     >
@@ -256,6 +302,20 @@ function Expenses() {
                         <option value="amountLow">Amount: Low to High</option>
                         <option value="amountHigh">Amount: High to Low</option>
                     </select>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearch("");
+                            setCategoryFilter("All");
+                            setPaymentMethodFilter("All");
+                            setStartDate("");
+                            setEndDate("");
+                            setSortOption("newest");
+                        }}
+                    >
+                        Clear Filters
+                    </button>
                 </div>
 
                 <div className="table-wrapper">
@@ -276,8 +336,12 @@ function Expenses() {
                                 <tr key={expense._id}>
                                     <td>{expense.title}</td>
                                     <td>{expense.category}</td>
-                                    <td>₹{Number(expense.amount).toLocaleString("en-IN")}</td>
-                                    <td>{new Date(expense.date).toLocaleDateString("en-IN")}</td>
+                                    <td>
+                                        ₹{Number(expense.amount).toLocaleString("en-IN")}
+                                    </td>
+                                    <td>
+                                        {new Date(expense.date).toLocaleDateString("en-IN")}
+                                    </td>
                                     <td>{expense.paymentMethod}</td>
                                     <td>
                                         <button onClick={() => handleEdit(expense)}>

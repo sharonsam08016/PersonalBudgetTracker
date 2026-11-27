@@ -84,15 +84,180 @@ router.post("/", authMiddleware, async (req, res) => {
 // GET /api/expenses
 // ==========================================
 
+
+// ==========================================
+// 2. GET ALL EXPENSES WITH SEARCH, FILTERS
+// AND SORTING
+// GET /api/expenses
+// ==========================================
+
 router.get("/", authMiddleware, async (req, res) => {
     try {
-        const expenses = await Expense.find({
+        const {
+            search,
+            category,
+            paymentMethod,
+            startDate,
+            endDate,
+            sortBy = "date",
+            order = "desc"
+        } = req.query;
+
+        // Allowed categories
+        const allowedCategories = [
+            "Food",
+            "Travel",
+            "Shopping",
+            "Healthcare",
+            "Education",
+            "Others"
+        ];
+
+        // Allowed payment methods
+        const allowedPaymentMethods = [
+            "Cash",
+            "UPI",
+            "Credit Card",
+            "Debit Card"
+        ];
+
+        // Validate category
+        if (category && !allowedCategories.includes(category)) {
+            return res.status(400).json({
+                message: "Invalid expense category"
+            });
+        }
+
+        // Validate payment method
+        if (
+            paymentMethod &&
+            !allowedPaymentMethods.includes(paymentMethod)
+        ) {
+            return res.status(400).json({
+                message: "Invalid payment method"
+            });
+        }
+
+        // Validate sorting field
+        if (!["date", "amount"].includes(sortBy)) {
+            return res.status(400).json({
+                message: "Sort by must be date or amount"
+            });
+        }
+
+        // Validate sorting order
+        if (!["asc", "desc"].includes(order)) {
+            return res.status(400).json({
+                message: "Order must be asc or desc"
+            });
+        }
+
+        // Build query for logged-in user
+        const filter = {
             user: req.user.userId
-        }).sort({ date: -1 });
+        };
+
+        // Search by expense title
+        if (search !== undefined) {
+            if (typeof search !== "string") {
+                return res.status(400).json({
+                    message: "Invalid search value"
+                });
+            }
+
+            const escapedSearch = search.trim().replace(
+                /[.*+?^${}()|[\]\\]/g,
+                "\\$&"
+            );
+
+            if (escapedSearch) {
+                filter.title = {
+                    $regex: escapedSearch,
+                    $options: "i"
+                };
+            }
+        }
+
+        // Filter by category
+        if (category) {
+            filter.category = category;
+        }
+
+        // Filter by payment method
+        if (paymentMethod) {
+            filter.paymentMethod = paymentMethod;
+        }
+
+        // Validate and filter by date range
+        const isValidDate = (value) => {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                return false;
+            }
+
+            const parsed = new Date(`${value}T00:00:00.000Z`);
+
+            return !isNaN(parsed.getTime()) &&
+                parsed.toISOString().startsWith(value);
+        };
+
+        if (startDate || endDate) {
+            if (
+                (startDate && !isValidDate(startDate)) ||
+                (endDate && !isValidDate(endDate))
+            ) {
+                return res.status(400).json({
+                    message: "Please provide valid dates in YYYY-MM-DD format"
+                });
+            }
+
+            if (startDate && endDate && startDate > endDate) {
+                return res.status(400).json({
+                    message: "Start date cannot be after end date"
+                });
+            }
+
+            filter.date = {};
+
+            if (startDate) {
+                filter.date.$gte = new Date(
+                    `${startDate}T00:00:00.000Z`
+                );
+            }
+
+            if (endDate) {
+                const nextDay = new Date(
+                    `${endDate}T00:00:00.000Z`
+                );
+
+                nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+
+                // Exclusive next-day boundary includes the
+                // entire selected end date.
+                filter.date.$lt = nextDay;
+            }
+        }
+
+        // Configure sorting
+        const sortOptions = {
+            [sortBy]: order === "asc" ? 1 : -1
+        };
+
+        // Fetch matching expenses
+        const expenses = await Expense.find(filter)
+            .sort(sortOptions);
 
         return res.status(200).json({
             message: "Expenses fetched successfully",
             count: expenses.length,
+            filters: {
+                search: search || "",
+                category: category || "",
+                paymentMethod: paymentMethod || "",
+                startDate: startDate || "",
+                endDate: endDate || "",
+                sortBy,
+                order
+            },
             expenses
         });
 
@@ -104,6 +269,7 @@ router.get("/", authMiddleware, async (req, res) => {
         });
     }
 });
+
 
 
 // ==========================================
